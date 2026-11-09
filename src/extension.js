@@ -165,7 +165,7 @@ class Session {
     output.clear();
     output.appendLine(render.outputText(res, label, job.timeoutMs));
     if (res.status === 'spawn') rating.failure();
-    else if (res.status !== 'syntax') {
+    else if (res.status === 'done') { // a run that threw, timed out, crashed or exited non-zero never leads to a rating ask
       const isSample = this.sample && doc.getText() === this.sampleText;
       rating.success(isSample ? { sample: true } : doc.uri);
     }

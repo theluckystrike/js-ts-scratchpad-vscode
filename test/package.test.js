@@ -52,3 +52,9 @@ test('shared license and rating modules are the factory copies', () => {
   for (const f of ['index.js', 'license.js', 'sponsors.js']) assert.equal(src(`src/license/${f}`), fs.readFileSync(path.join(fac, 'license', f), 'utf8'), f);
   assert.equal(src('src/rate.js'), fs.readFileSync(path.join(fac, 'rating', 'rate.js'), 'utf8'));
 });
+
+test('rating ask: only a clean run (status done) counts as a success; errors, time limit and crashes never lead to an ask', () => {
+  const ext = fs.readFileSync(path.join(__dirname, '..', 'src', 'extension.js'), 'utf8');
+  assert.match(ext, /if \(res\.status === 'spawn'\) rating\.failure\(\);\s*else if \(res\.status === 'done'\) \{/);
+  assert.equal((ext.match(/rating\.success\(/g) || []).length, 1);
+});

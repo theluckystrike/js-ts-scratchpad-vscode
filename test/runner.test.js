@@ -161,3 +161,59 @@ test('cancel while a large file is being parsed', async () => {
   const res = await h.promise;
   assert.equal(res.status, 'cancelled');
 });
+
+// Processes the scratchpad code starts must never outlive its run (VER15-R: they used to stay after the time
+// limit, after an edit and after a normal end; a grandchild holding stdout kept the run open forever).
+const alive = (pid) => { try { process.kill(pid, 0); return true; } catch (_) { return false; } };
+const pidsIn = (f) => (fs.existsSync(f) ? fs.readFileSync(f, 'utf8').trim().split(/\s+/).map(Number).filter(Boolean) : []);
+const kidCode = (pf) => `const cp = require('child_process');\nconst fs = require('fs');\nconst c = cp.spawn(process.execPath, ['-e', ${JSON.stringify("const cp=require('child_process');const g=cp.spawn(process.execPath,['-e','setInterval(()=>{},1000)'],{stdio:'ignore'});require('fs').appendFileSync(process.argv[1],process.pid+' '+g.pid+' ');setInterval(()=>{},1000)")}, ${JSON.stringify(pf)}], { stdio: 'ignore' });\n`;
+const settle = () => new Promise((r) => setTimeout(r, 700));
+const cleanup = (p) => p.forEach((x) => { try { process.kill(x, 'SIGKILL'); } catch (_) { /* gone */ } });
+
+test('the time limit ends the run with its child and grandchild', { skip: process.platform === 'win32' }, async () => {
+  const pf = path.join(work, 'pids-timeout');
+  const res = await run(kidCode(pf) + 'setInterval(() => {}, 1000);\n', 'k1.js', { timeoutMs: 1500 });
+  await settle();
+  const p = pidsIn(pf);
+  cleanup(p);
+  assert.equal(res.status, 'timeout');
+  assert.equal(p.length, 2, String(p));
+  assert.deepEqual(p.filter(alive), []);
+});
+
+test('a child still running when the script ends is ended with the run', { skip: process.platform === 'win32' }, async () => {
+  const pf = path.join(work, 'pids-exit');
+  const res = await run(kidCode(pf) + 'c.unref();\nawait new Promise((r) => setTimeout(r, 400));\n"done";\n', 'k2.mjs');
+  await settle();
+  const p = pidsIn(pf);
+  cleanup(p);
+  assert.equal(res.status, 'done', JSON.stringify(res.state.errors));
+  assert.ok(p.length === 2, String(p));
+  assert.deepEqual(p.filter(alive), []);
+});
+
+test('a grandchild that holds stdout does not keep the run open', { skip: process.platform === 'win32' }, async () => {
+  const pf = path.join(work, 'pids-inherit');
+  const t = Date.now();
+  const res = await run(`const cp = require('child_process');\nconst g = cp.spawn('/bin/sleep', ['60'], { stdio: 'inherit' });\nrequire('fs').writeFileSync(${JSON.stringify(pf)}, String(g.pid));\ng.unref();\n1 + 1;\n`, 'k3.js', { timeoutMs: 20000 });
+  await settle();
+  const p = pidsIn(pf);
+  cleanup(p);
+  assert.ok(Date.now() - t < 6000, `${Date.now() - t} ms`);
+  assert.equal(res.status, 'done');
+  assert.deepEqual(p.filter(alive), []);
+});
+
+test('cancel (a new edit) ends the run with its children', { skip: process.platform === 'win32' }, async () => {
+  const pf = path.join(work, 'pids-cancel');
+  const h = runner.run({ text: kidCode(pf) + 'setInterval(() => {}, 1000);\n', fileName: 'k4.js', origPath: path.join(work, 'k4.js'), origDir: work, timeoutMs: 30000 });
+  for (let i = 0; i < 50 && pidsIn(pf).length < 2; i++) await new Promise((r) => setTimeout(r, 100));
+  h.cancel();
+  const res = await h.promise;
+  await settle();
+  const p = pidsIn(pf);
+  cleanup(p);
+  assert.equal(res.status, 'cancelled');
+  assert.equal(p.length, 2, String(p));
+  assert.deepEqual(p.filter(alive), []);
+});

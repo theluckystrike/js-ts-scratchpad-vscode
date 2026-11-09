@@ -5,7 +5,22 @@
 // and a new run of the same file kills the old one first.
 const fs = require('fs');
 const path = require('path');
-const { spawn } = require('child_process');
+const { spawn, execFile } = require('child_process');
+
+/**
+ * Kills a run and every process it started. On macOS and Linux the run is the leader of its own process group
+ * (spawned with detached), so one signal to -pid reaches its children and grandchildren too.
+ * On Windows taskkill /T walks the tree.
+ */
+function killTree(child) {
+  if (!child || !child.pid) return;
+  if (process.platform === 'win32') {
+    try { execFile('taskkill', ['/PID', String(child.pid), '/T', '/F'], { windowsHide: true }, () => {}); } catch (_) { /* gone */ }
+  } else {
+    try { process.kill(-child.pid, 'SIGKILL'); } catch (_) { /* group gone */ }
+  }
+  try { child.kill('SIGKILL'); } catch (_) { /* gone */ }
+}
 const { instrument, missingModuleLine } = require('./instrument');
 
 const STD_CAP = 256 * 1024;
@@ -225,6 +240,7 @@ class Runner {
       try {
         child = spawn(job.execPath || process.execPath, args, {
           cwd: job.cwd || job.origDir || this.tmpRoot, env, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true,
+          detached: process.platform !== 'win32', // own process group: the time limit, a new edit and Stop end its children too
         });
       } catch (e) {
         clearInterval(poll);
@@ -232,7 +248,7 @@ class Runner {
         resolve({ status: 'spawn', message: e.message, ms: Date.now() - started });
         return;
       }
-      const handle = { kill: (why) => { reason = reason || why; try { child.kill('SIGKILL'); } catch (_) { /* gone */ } } };
+      const handle = { kill: (why) => { reason = reason || why; killTree(child); } };
       this.active.add(handle);
       cancelFn = () => handle.kill('cancel');
       const timer = setTimeout(() => handle.kill('timeout'), Math.max(200, job.timeoutMs || 5000));
@@ -247,6 +263,16 @@ class Runner {
         fs.rm(dir, { recursive: true, force: true }, () => {});
         resolve({ status: 'spawn', message: e.message, ms: Date.now() - started });
       });
+      // When the script itself ends, nothing it started may outlive the run: end its process group. A child that
+      // escaped the group (its own setsid) and still holds stdout must not keep the run open either.
+      child.on('exit', (code, signal) => {
+        if (process.platform !== 'win32') { try { process.kill(-child.pid, 'SIGKILL'); } catch (_) { /* group gone */ } }
+        setTimeout(() => {
+          if (finished) return;
+          try { child.stdout.destroy(); child.stderr.destroy(); } catch (_) { /* closed */ }
+          finish(code, signal);
+        }, 1500);
+      });
       child.on('close', finish);
     });
     return { promise, cancel: () => cancelFn() };
@@ -255,4 +281,4 @@ class Runner {
   killAll() { for (const h of [...this.active]) h.kill('cancel'); }
 }
 
-module.exports = { Runner, applyEvent, newState };
+module.exports = { killTree, Runner, applyEvent, newState };
