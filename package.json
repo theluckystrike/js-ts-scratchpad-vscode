@@ -1,0 +1,429 @@
+{
+  "name": "zovo-js-ts-scratchpad",
+  "displayName": "JavaScript Playground & TypeScript Scratchpad with Inline Values (Live JS and TS Runner)",
+  "description": "JavaScript playground and TypeScript scratchpad for VS Code: the value of each line shows at the end of the line as you type, with console.log output and errors on their own lines. A live JS and TS runner for quick tests and a REPL-style scratch file, with no tsconfig, no setup and no sign-in. Free, works offline.",
+  "version": "0.1.0",
+  "publisher": "zovo",
+  "license": "MIT",
+  "icon": "icon.png",
+  "galleryBanner": {
+    "color": "#1B1F2E",
+    "theme": "dark"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/theluckystrike/js-ts-scratchpad-vscode"
+  },
+  "bugs": {
+    "url": "https://github.com/theluckystrike/js-ts-scratchpad-vscode/issues"
+  },
+  "homepage": "https://github.com/theluckystrike/js-ts-scratchpad-vscode#readme",
+  "engines": {
+    "vscode": "^1.90.0",
+    "node": ">=18"
+  },
+  "categories": [
+    "Debuggers",
+    "Other"
+  ],
+  "keywords": [
+    "javascript playground",
+    "typescript playground",
+    "js playground",
+    "javascript repl",
+    "typescript scratchpad",
+    "scratchpad",
+    "inline values",
+    "live evaluation",
+    "javascript runner",
+    "typescript runner",
+    "node",
+    "console log",
+    "quick test",
+    "repl",
+    "run javascript",
+    "run typescript",
+    "ts",
+    "js",
+    "sandbox"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onLanguage:javascript",
+    "onLanguage:typescript"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "In Restricted Mode no code is run: the scratchpad shows why, and runs once you trust the folder."
+    },
+    "virtualWorkspaces": {
+      "supported": false,
+      "description": "Code runs from files on this computer."
+    }
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "jsScratchpad.newJavaScript",
+        "title": "New JavaScript Scratchpad",
+        "category": "JavaScript Playground",
+        "icon": "$(new-file)"
+      },
+      {
+        "command": "jsScratchpad.newTypeScript",
+        "title": "New TypeScript Scratchpad",
+        "category": "JavaScript Playground"
+      },
+      {
+        "command": "jsScratchpad.start",
+        "title": "Start Inline Values",
+        "category": "JavaScript Playground",
+        "icon": "$(play)"
+      },
+      {
+        "command": "jsScratchpad.stop",
+        "title": "Stop Inline Values",
+        "category": "JavaScript Playground",
+        "icon": "$(debug-stop)"
+      },
+      {
+        "command": "jsScratchpad.toggle",
+        "title": "Start or Stop Inline Values",
+        "category": "JavaScript Playground"
+      },
+      {
+        "command": "jsScratchpad.runNow",
+        "title": "Run Now",
+        "category": "JavaScript Playground"
+      },
+      {
+        "command": "jsScratchpad.clearValues",
+        "title": "Clear Values",
+        "category": "JavaScript Playground"
+      },
+      {
+        "command": "jsScratchpad.showOutput",
+        "title": "Show Console Output",
+        "category": "JavaScript Playground"
+      },
+      {
+        "command": "jsScratchpad.valueHistory",
+        "title": "Show All Values of This Line",
+        "category": "JavaScript Playground"
+      },
+      {
+        "command": "jsScratchpad.copyMarkdown",
+        "title": "Copy Code with Values as Markdown",
+        "category": "JavaScript Playground"
+      },
+      {
+        "command": "jsScratchpad.toggleCoverage",
+        "title": "Show Which Lines Ran",
+        "category": "JavaScript Playground"
+      },
+      {
+        "command": "jsScratchpad.openWalkthrough",
+        "title": "Get Started",
+        "category": "JavaScript Playground"
+      },
+      {
+        "command": "jsScratchpad.supportDeveloper",
+        "title": "Support the developer",
+        "category": "JavaScript Playground"
+      },
+      {
+        "command": "jsScratchpad.moreViewers",
+        "title": "More free tools",
+        "category": "JavaScript Playground"
+      },
+      {
+        "command": "jsScratchpad.getPro",
+        "title": "Get Zovo Pro (USD 19 once, all Zovo extensions)",
+        "category": "JavaScript Playground"
+      },
+      {
+        "command": "jsScratchpad.unlockWithSponsors",
+        "title": "Unlock Zovo Pro with GitHub Sponsors",
+        "category": "JavaScript Playground"
+      },
+      {
+        "command": "jsScratchpad.enterLicenseKey",
+        "title": "Enter Zovo Pro License Key",
+        "category": "JavaScript Playground"
+      },
+      {
+        "command": "jsScratchpad.removeLicense",
+        "title": "Remove Zovo Pro from This Editor",
+        "category": "JavaScript Playground"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "jsScratchpad.start",
+          "when": "editorLangId =~ /^(javascript|typescript)$/"
+        },
+        {
+          "command": "jsScratchpad.stop",
+          "when": "jsScratchpad.activeHasValues"
+        },
+        {
+          "command": "jsScratchpad.toggle",
+          "when": "editorLangId =~ /^(javascript|typescript)$/"
+        },
+        {
+          "command": "jsScratchpad.runNow",
+          "when": "editorLangId =~ /^(javascript|typescript)$/"
+        },
+        {
+          "command": "jsScratchpad.clearValues",
+          "when": "jsScratchpad.activeHasValues"
+        },
+        {
+          "command": "jsScratchpad.valueHistory",
+          "when": "jsScratchpad.activeHasValues"
+        },
+        {
+          "command": "jsScratchpad.copyMarkdown",
+          "when": "jsScratchpad.activeHasValues"
+        },
+        {
+          "command": "jsScratchpad.toggleCoverage",
+          "when": "jsScratchpad.activeHasValues"
+        },
+        {
+          "command": "jsScratchpad.getPro",
+          "when": "jsScratchpad.proEnabled && config.jsScratchpad.showProFeatures"
+        },
+        {
+          "command": "jsScratchpad.unlockWithSponsors",
+          "when": "jsScratchpad.proEnabled && config.jsScratchpad.showProFeatures"
+        },
+        {
+          "command": "jsScratchpad.enterLicenseKey",
+          "when": "jsScratchpad.proEnabled && config.jsScratchpad.showProFeatures"
+        },
+        {
+          "command": "jsScratchpad.removeLicense",
+          "when": "jsScratchpad.proEnabled && config.jsScratchpad.showProFeatures"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "jsScratchpad.start",
+          "when": "(resourceExtname =~ /^\\.(js|mjs|cjs|ts|mts|cts)$/i || resourceScheme == untitled && editorLangId =~ /^(javascript|typescript)$/) && !jsScratchpad.activeHasValues && config.jsScratchpad.showTitleButton",
+          "group": "navigation@95"
+        },
+        {
+          "command": "jsScratchpad.stop",
+          "when": "(resourceExtname =~ /^\\.(js|mjs|cjs|ts|mts|cts)$/i || resourceScheme == untitled && editorLangId =~ /^(javascript|typescript)$/) && jsScratchpad.activeHasValues && config.jsScratchpad.showTitleButton",
+          "group": "navigation@95"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "jsScratchpad.start",
+          "when": "editorLangId =~ /^(javascript|typescript)$/ && !jsScratchpad.activeHasValues",
+          "group": "z_playground@1"
+        },
+        {
+          "command": "jsScratchpad.stop",
+          "when": "jsScratchpad.activeHasValues",
+          "group": "z_playground@1"
+        },
+        {
+          "command": "jsScratchpad.valueHistory",
+          "when": "jsScratchpad.activeHasValues",
+          "group": "z_playground@2"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "jsScratchpad.start",
+          "when": "resourceExtname =~ /^\\.(js|mjs|cjs|ts|mts|cts)$/i",
+          "group": "z_playground@1"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "JavaScript Playground",
+      "properties": {
+        "jsScratchpad.runOn": {
+          "type": "string",
+          "enum": [
+            "change",
+            "save"
+          ],
+          "enumDescriptions": [
+            "Run after each edit, once you stop typing for the debounce time.",
+            "Run only when you save the file (or run Run Now)."
+          ],
+          "default": "change",
+          "description": "When the file runs again."
+        },
+        "jsScratchpad.debounceMs": {
+          "type": "number",
+          "default": 300,
+          "minimum": 0,
+          "maximum": 5000,
+          "description": "Milliseconds to wait after the last key press before running again."
+        },
+        "jsScratchpad.timeoutSeconds": {
+          "type": "number",
+          "default": 5,
+          "minimum": 0.2,
+          "maximum": 600,
+          "description": "Each run is stopped after this many seconds, so an endless loop never hangs anything."
+        },
+        "jsScratchpad.memoryLimitMB": {
+          "type": "number",
+          "default": 1024,
+          "minimum": 64,
+          "maximum": 16384,
+          "description": "Memory limit of each run in MB (Node's max-old-space-size option)."
+        },
+        "jsScratchpad.runtime": {
+          "type": "string",
+          "enum": [
+            "vscode",
+            "node"
+          ],
+          "enumDescriptions": [
+            "The Node.js that comes with VS Code. Nothing to install.",
+            "The node on your PATH (or jsScratchpad.nodePath), so your own Node version runs the code."
+          ],
+          "default": "vscode",
+          "description": "Which Node.js runs the code."
+        },
+        "jsScratchpad.nodePath": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "description": "Full path of a node program, used when runtime is node. Empty: node from PATH."
+        },
+        "jsScratchpad.moduleType": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "esm",
+            "cjs"
+          ],
+          "enumDescriptions": [
+            "ES module when the file has import or export (or ends in .mjs/.mts), CommonJS otherwise. Top-level await works in both.",
+            "Always run as an ES module.",
+            "Always run as CommonJS."
+          ],
+          "default": "auto",
+          "description": "How the file is run. require() works in both."
+        },
+        "jsScratchpad.maxValuesPerLine": {
+          "type": "number",
+          "default": 100,
+          "minimum": 1,
+          "maximum": 10000,
+          "description": "Values kept per line. After that a line only counts how many more ran, so a loop of a million iterations stays fast."
+        },
+        "jsScratchpad.inlineMaxLength": {
+          "type": "number",
+          "default": 120,
+          "minimum": 20,
+          "maximum": 1000,
+          "description": "Characters shown at the end of a line. Hover the value for more."
+        },
+        "jsScratchpad.scratchFolder": {
+          "type": "string",
+          "default": "",
+          "description": "Folder for new scratchpads. Empty: a new untitled file. ~ and ${workspaceFolder} work."
+        },
+        "jsScratchpad.showTitleButton": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the Start and Stop button in the editor title bar of JavaScript and TypeScript files."
+        },
+        "jsScratchpad.askForRating": {
+          "type": "boolean",
+          "default": true,
+          "description": "Ask at most twice, after a few days of use, whether you want to rate the extension. Off: never ask."
+        },
+        "jsScratchpad.showSupportLinks": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the Support the developer and More free tools links in the Get Started page."
+        },
+        "jsScratchpad.showProFeatures": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show Zovo Pro commands when a Pro tier exists. Today every feature is free."
+        }
+      }
+    },
+    "walkthroughs": [
+      {
+        "id": "jsScratchpad.start",
+        "title": "JavaScript Playground & TypeScript Scratchpad",
+        "description": "See the value of every line while you type, in about ten seconds.",
+        "steps": [
+          {
+            "id": "js",
+            "title": "Open a JavaScript scratchpad",
+            "description": "Opens a short example with values at the end of each line. Change a number and watch them update.\n[New JavaScript Scratchpad](command:jsScratchpad.newJavaScript)",
+            "media": {
+              "markdown": "walkthrough/js.md"
+            },
+            "completionEvents": [
+              "onCommand:jsScratchpad.newJavaScript"
+            ]
+          },
+          {
+            "id": "ts",
+            "title": "Try TypeScript, with no setup",
+            "description": "Types, interfaces, enums and satisfies work without a tsconfig or an install.\n[New TypeScript Scratchpad](command:jsScratchpad.newTypeScript)",
+            "media": {
+              "markdown": "walkthrough/ts.md"
+            },
+            "completionEvents": [
+              "onCommand:jsScratchpad.newTypeScript"
+            ]
+          },
+          {
+            "id": "own",
+            "title": "Inline values in your own file",
+            "description": "Open any .js, .mjs, .cjs, .ts, .mts or .cts file and click Inline Values in the status bar. Imports resolve from the file's folder and node_modules.\n[Start Inline Values](command:jsScratchpad.start)",
+            "media": {
+              "markdown": "walkthrough/own.md"
+            },
+            "completionEvents": [
+              "onCommand:jsScratchpad.start"
+            ]
+          },
+          {
+            "id": "settings",
+            "title": "Run on save, time limit, your own Node",
+            "description": "Choose when it runs, the time and memory limits, and whether VS Code's Node or yours runs the code.\n[Open settings](command:workbench.action.openSettings?%5B%22jsScratchpad%22%5D)",
+            "media": {
+              "markdown": "walkthrough/settings.md"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "scripts": {
+    "build": "node scripts/build.js --production",
+    "test": "node scripts/build.js --production && node --test \"test/*.test.js\"",
+    "package": "npm run build && npx -y @vscode/vsce package --no-dependencies -o dist/"
+  },
+  "dependencies": {
+    "acorn": "8.19.0",
+    "acorn-walk": "8.3.5",
+    "sucrase": "3.35.1"
+  },
+  "devDependencies": {
+    "@types/vscode": "~1.90.0",
+    "esbuild": "0.28.2"
+  },
+  "sponsor": {
+    "url": "https://github.com/sponsors/theluckystrike"
+  }
+}

@@ -1,0 +1,12 @@
+**
+!dist/extension.js
+!dist/instrument-worker.js
+!dist/extension.js.LEGAL.txt
+!dist/runtime/**
+!walkthrough/**
+!icon.png
+!README.md
+!CHANGELOG.md
+!LICENSE
+!THIRD-PARTY-NOTICES.md
+!package.json
